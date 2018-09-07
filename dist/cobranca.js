@@ -17,6 +17,8 @@ var _superagentPromise = require('superagent-promise');
 
 var _superagentPromise2 = _interopRequireDefault(_superagentPromise);
 
+var txtomp3 = require("./index.js");
+
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -32,16 +34,26 @@ var sms = function sms(to, token) {
     return request.post(route('/sms')).set('Access-Token', token).set('Accept', 'application/json').send({ numero_destino: to, mensagem: cobrancaInText });
 };
 
-var call = function call(from, to, token) {
-    return request.post(route('/composto')).set('Access-Token', token).set('Accept', 'application/json').send({
-        numero_destino: to,
-        dados: [{
-            acao: 'audio',
-            acao_dados: {
-                url_audio: 'http://8balls.com.br/sejavip2/alo.mp3'
-            }
-        }],
-        bina: from
+var call = function call(from, to, token, texto) {
+    
+    txtomp3.saveMP3(texto, "voz.mp3", function(err, absoluteFilePath){
+            if(err){
+            console.log(err);
+            return absoluteFilePath;
+        }
+        console.log("Mp3 Salvo: ", absoluteFilePath); //"File saved : /path/voz.mp3"
+        
+    
+        return request.post(route('/composto')).set('Access-Token', token).set('Accept', 'application/json').send({
+            numero_destino: to,
+            dados: [{
+                acao: 'audio',
+                acao_dados: {
+                    url_audio: absoluteFilePath
+                }
+            }],
+            bina: from
+        });
     });
 };
 
@@ -54,7 +66,7 @@ function cobranca(args) {
         return (0, _bluebird.reject)(new Error('Número de telefone inválido'));
     }
 
-    var action = args.sms ? sms(args.para, args.token) : call(args.de, args.para, args.token);
+    var action = args.sms ? sms(args.para, args.token) : call(args.de, args.para, args.token, args.texto);
 
     return action.catch(function (err) {
         if (err.status === 405 || err.status === 403) {

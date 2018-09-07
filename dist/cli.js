@@ -26,12 +26,13 @@ var emitError = function emitError(message) {
 };
 
 function cli(args) {
-    (0, _cobranca2.default)(args).then(function () {
-        emitSuccess(args.sms ? 'sms enviado!' : 'chamada efetuada!');
-    }).catch((0, _ramda.pipe)((0, _ramda.prop)('message'), emitError));
+		(0, _cobranca2.default)(args).then(function () {
+	    emitSuccess(args.sms ? 'sms enviado!' : 'chamada efetuada!');
+		}).catch((0, _ramda.pipe)((0, _ramda.prop)('message'), emitError));
 }
 
-cli(_yargs2.default.usage('Uso: ligar-cobranca --de=<de> --para=<para>').option('token', {
+
+cli(_yargs2.default.usage('Uso: ligar-cobranca --de=<de> --para=<para> --texto="<texto>"').option('token', {
     describe: 'Token do TotalVoice',
     type: 'string'
 }).option('de', {
@@ -43,4 +44,7 @@ cli(_yargs2.default.usage('Uso: ligar-cobranca --de=<de> --para=<para>').option(
 }).option('sms', {
     describe: 'Se definido, será enviado um SMS ao invés de uma chamada',
     type: 'boolean'
-}).demandOption(['para', 'token']).locale('pt_BR').strict().help().version().argv);
+}).option('texto', {
+    describe: 'Adicione um texto "Parem de me ligar!"',
+    type: 'string'
+}).demandOption(['para', 'token', 'texto']).locale('pt_BR').strict().help().version().argv);
